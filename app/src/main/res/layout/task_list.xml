@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="5dp"
+    android:id="@+id/taskList"
+    android:layout_marginBottom="10dp"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Contact Name -->
+        <TextView
+            android:id="@+id/task"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:padding="5dp"
+            android:text="Finish Homework"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/taskTime"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/task"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="0dp"
+            android:autofillHints=""
+            android:ems="10"
+            android:padding="5dp"
+            android:text="10 pm" />
+
+        <TextView
+            android:id="@+id/taskDate"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/taskTime"
+            android:layout_below="@id/task"
+            android:layout_marginTop="0dp"
+            android:autofillHints=""
+            android:ems="10"
+            android:padding="5dp"
+            android:text="11.12.2025" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnTaskDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="55dp"
+            android:layout_toEndOf="@id/task"
+            android:backgroundTint="@color/green"
+            android:layout_centerVertical="true"
+            android:contentDescription="Finished Task"
+            android:src="@drawable/ic_done" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:id="@+id/btnEditTime"
+            android:layout_toEndOf="@id/btnTaskDone"
+            android:layout_centerVertical="true"
+            android:contentDescription="Adjust Time"
+            android:src="@drawable/ic_edit_time"
+            android:backgroundTint="@color/blue"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:id="@+id/btnTaskDelete"
+            android:layout_toEndOf="@id/btnEditTime"
+            android:layout_centerVertical="true"
+            android:contentDescription="Delete Task"
+            android:src="@drawable/ic_bin"
+            android:backgroundTint="@color/red"/>
+
+
+    </RelativeLayout>
+
+
+</androidx.cardview.widget.CardView>
