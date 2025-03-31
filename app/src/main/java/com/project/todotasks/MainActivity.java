@@ -3,6 +3,7 @@ package com.project.todotasks;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -11,15 +12,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
+import java.sql.Time;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CreateTasksDialogFragment.TaskDialogListener {
 
+    private final ArrayList<TaskList> tasksList = new ArrayList<>();
+    private TasksRecycleAdapter tasksAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,33 +50,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         RecyclerView taskViewRecycle = findViewById(R.id.taskView);
-
-        ArrayList<TaskList> tasks = new ArrayList<>();
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
-        tasks.add(new TaskList("Finish Laundry", "10:30", "12/04/2025"));
+        FloatingActionButton btnAddTask = findViewById(R.id.btnNewTask);
 
         // view adapter
-        TasksRecycleAdapter tasksRecycleAdapter = new TasksRecycleAdapter(this);
-        tasksRecycleAdapter.setTasks(tasks);
+        tasksAdapter = new TasksRecycleAdapter(this);
+        tasksAdapter.setTasks(tasksList);
 
         MaterialToolbar topAppBar = findViewById(R.id.appMenuBar);
         setSupportActionBar(topAppBar);
 
-        taskViewRecycle.setAdapter(tasksRecycleAdapter);
+        taskViewRecycle.setAdapter(tasksAdapter);
 
         taskViewRecycle.setLayoutManager(new LinearLayoutManager(this));
 
@@ -67,6 +67,11 @@ public class MainActivity extends AppCompatActivity {
         topAppBar.setNavigationOnClickListener(view ->
                 Toast.makeText(this, "Menu clicked", Toast.LENGTH_SHORT).show()
         );
+    }
+    
+    public void createTask(View view){
+        CreateTasksDialogFragment taskDialog = new CreateTasksDialogFragment();
+        taskDialog.show(getSupportFragmentManager(), "Add Task");
     }
 
     @Override
@@ -82,5 +87,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onTaskAdded(String title, String date, String time) {
+        TaskList newTask = new TaskList(title, time, date);
+        tasksList.add(newTask);
+        tasksAdapter.notifyDataSetChanged();
     }
 }

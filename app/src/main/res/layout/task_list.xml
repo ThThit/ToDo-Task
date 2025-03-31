@@ -10,12 +10,14 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
 
         <!-- Contact Name -->
         <TextView
             android:id="@+id/task"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:padding="5dp"
@@ -39,9 +41,9 @@
             android:id="@+id/taskDate"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/taskTime"
             android:layout_below="@id/task"
             android:layout_marginTop="0dp"
+            android:layout_toEndOf="@id/taskTime"
             android:autofillHints=""
             android:ems="10"
             android:padding="5dp"
@@ -51,34 +53,21 @@
             android:id="@+id/btnTaskDone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="55dp"
+            android:layout_marginStart="70dp"
             android:layout_toEndOf="@id/task"
             android:backgroundTint="@color/green"
-            android:layout_centerVertical="true"
             android:contentDescription="Finished Task"
             android:src="@drawable/ic_done" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:id="@+id/btnEditTime"
-            android:layout_toEndOf="@id/btnTaskDone"
-            android:layout_centerVertical="true"
-            android:contentDescription="Adjust Time"
-            android:src="@drawable/ic_edit_time"
-            android:backgroundTint="@color/blue"/>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:id="@+id/btnTaskDelete"
-            android:layout_toEndOf="@id/btnEditTime"
-            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="41dp"
+            android:layout_toEndOf="@id/btnTaskDone"
+            android:backgroundTint="@color/red"
             android:contentDescription="Delete Task"
-            android:src="@drawable/ic_bin"
-            android:backgroundTint="@color/red"/>
+            android:src="@drawable/ic_bin" />
 
 
     </RelativeLayout>

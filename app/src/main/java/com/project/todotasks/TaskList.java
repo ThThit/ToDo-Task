@@ -1,6 +1,4 @@
 package com.project.todotasks;
-import java.sql.Time;
-
 public class TaskList {
     private String taskTitle;
     private String taskTime;

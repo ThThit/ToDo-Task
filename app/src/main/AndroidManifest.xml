@@ -13,6 +13,9 @@
         android:theme="@style/Theme.ToDoTasks"
         tools:targetApi="31">
         <activity
+            android:name=".add_task_dialog"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
