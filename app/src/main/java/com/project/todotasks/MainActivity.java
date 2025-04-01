@@ -1,6 +1,9 @@
 package com.project.todotasks;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +26,10 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -35,7 +41,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements CreateTasksDialogFragment.TaskDialogListener {
 
-    private final ArrayList<TaskList> tasksList = new ArrayList<>();
+    private ArrayList<TaskList> tasksList = new ArrayList<>();
     private TasksRecycleAdapter tasksAdapter;
 
     @Override
@@ -51,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements CreateTasksDialog
 
         RecyclerView taskViewRecycle = findViewById(R.id.taskView);
         FloatingActionButton btnAddTask = findViewById(R.id.btnNewTask);
+
+        // load from shared preferences
+        tasksList = loadTasks();
 
         // view adapter
         tasksAdapter = new TasksRecycleAdapter(this);
@@ -89,11 +98,37 @@ public class MainActivity extends AppCompatActivity implements CreateTasksDialog
         return super.onOptionsItemSelected(item);
     }
 
+    private void saveTasks(ArrayList<TaskList> taskLists){
+        SharedPreferences sharedPreferences = getSharedPreferences("My Tasks", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        Gson gson = new Gson();
+        String json = gson.toJson(taskLists); // convert to json
+        Log.d("saveTasks", "Saving JSON: " + json);
+
+        editor.putString("task_list", json);
+        editor.apply();
+    }
+
+
+    // load from json
+    private ArrayList<TaskList> loadTasks(){
+        SharedPreferences sharedPreferences = getSharedPreferences("My Tasks", Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString("task_list", null);
+
+        if (json != null){
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<TaskList>>() {}.getType();
+            return gson.fromJson(json, type);
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
     @Override
-    public void onTaskAdded(String title, String date, String time) {
-        TaskList newTask = new TaskList(title, time, date);
-        tasksList.add(newTask);
+    public void onTaskAdded(TaskList tasks) {
+        tasksList.add(tasks);
+        saveTasks(tasksList);
         tasksAdapter.notifyDataSetChanged();
     }
 }

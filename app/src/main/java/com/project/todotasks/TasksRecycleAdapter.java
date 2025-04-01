@@ -1,6 +1,8 @@
 package com.project.todotasks;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,10 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder> {
@@ -54,9 +59,19 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
             public void onClick(View view) {
                 int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION){
-                    tasks.remove(currentPosition);
-                    notifyItemRemoved(currentPosition);
-                    notifyItemRangeChanged(currentPosition, tasks.size()); // update
+                    // get from the current list
+                    ArrayList<TaskList> updateTaskList = loadTasks();
+                    // remove task
+                    if (currentPosition < updateTaskList.size()) {
+                        updateTaskList.remove(currentPosition);
+                        // save the list again
+                        saveTasks(updateTaskList);
+                        // update view
+                        tasks.remove(currentPosition);
+                        notifyItemRemoved(currentPosition);
+                        notifyItemRangeChanged(currentPosition, tasks.size());
+
+                    }
                 }
 
             }
@@ -64,9 +79,35 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
 
     }
 
+    private ArrayList<TaskList> loadTasks() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("My Tasks", Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString("task_list", null);
+
+        if (json != null) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<TaskList>> () {}
+                    .getType();
+            return gson.fromJson(json, type);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     @Override
     public int getItemCount() {
         return tasks.size();
+    }
+
+    private void saveTasks(ArrayList<TaskList> taskLists){
+        SharedPreferences sharedPreferences = context.getSharedPreferences("My Tasks", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        Gson gson = new Gson();
+        String json = gson.toJson(taskLists); // convert to json
+        Log.d("saveTasks", "Saving JSON: " + json);
+
+        editor.putString("task_list", json);
+        editor.apply();
     }
 
     public void setTasks(ArrayList<TaskList> tasks) {

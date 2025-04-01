@@ -5,7 +5,9 @@ package com.project.todotasks;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -19,11 +21,16 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class CreateTasksDialogFragment extends DialogFragment {
 
@@ -33,7 +40,7 @@ public class CreateTasksDialogFragment extends DialogFragment {
     private String selectedDate = "", selectedTime = "";
 
     public interface TaskDialogListener{
-        void onTaskAdded(String title, String date, String time);
+        void onTaskAdded(TaskList tasks);
     }
     private TaskDialogListener listener;
 
@@ -67,10 +74,12 @@ public class CreateTasksDialogFragment extends DialogFragment {
                 .setTitle("Create Task")
                 .setPositiveButton("Save", (dialog, which) -> {
                     title = taskTitle.getText().toString().trim();
-                       listener.onTaskAdded(title, selectedDate, selectedTime);
+                    TaskList newTask = new TaskList(title, selectedDate, selectedTime);
+                    listener.onTaskAdded(newTask);
                     Toast.makeText(requireContext(), title+selectedTime+selectedDate, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
                 });
         return  builder.create();
     }
