@@ -73,7 +73,30 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
 
                     }
                 }
+                Toast.makeText(context, "Task Deleted", Toast.LENGTH_SHORT).show();
+            }
+        });
 
+        holder.btnTaskDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION){
+                    // get from the current list
+                    ArrayList<TaskList> updateTaskList = loadTasks();
+                    // remove task
+                    if (currentPosition < updateTaskList.size()) {
+                        updateTaskList.remove(currentPosition);
+                        // save the list again
+                        saveTasks(updateTaskList);
+                        // update view
+                        tasks.remove(currentPosition);
+                        notifyItemRemoved(currentPosition);
+                        notifyItemRangeChanged(currentPosition, tasks.size());
+
+                    }
+                }
+                Toast.makeText(context, "Task Done", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -1,7 +1,5 @@
 package com.project.todotasks;
 
-
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -74,9 +72,12 @@ public class CreateTasksDialogFragment extends DialogFragment {
                 .setTitle("Create Task")
                 .setPositiveButton("Save", (dialog, which) -> {
                     title = taskTitle.getText().toString().trim();
-                    TaskList newTask = new TaskList(title, selectedDate, selectedTime);
-                    listener.onTaskAdded(newTask);
-                    Toast.makeText(requireContext(), title+selectedTime+selectedDate, Toast.LENGTH_SHORT).show();
+                    if (title != null && !title.isEmpty()){
+                        TaskList newTask = new TaskList(title, selectedDate, selectedTime);
+                        listener.onTaskAdded(newTask);
+                    } else {
+                        Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     dialog.dismiss();
