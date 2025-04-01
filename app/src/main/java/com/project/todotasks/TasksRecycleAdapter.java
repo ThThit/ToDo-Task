@@ -4,19 +4,25 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
 public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder> {
 
     private ArrayList<TaskList> tasks = new ArrayList<>();
+    private final Context context;
 
     public TasksRecycleAdapter(Context context) {
+        this.context = context;
     }
 
     @NonNull
@@ -33,15 +39,28 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
         holder.taskDate.setText(taskList.getTaskDate());
         holder.taskTime.setText(taskList.getTaskTime());
 
-//        holder.parent.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                int currentPosition = holder.getAdapterPosition(); // get position
-//                if (currentPosition != RecyclerView.NO_POSITION){
-//                    Toast.makeText(context, tasks.get(currentPosition).getTaskTitle() + " Selected", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
+        holder.parent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION){
+                    Toast.makeText(context, tasks.get(currentPosition).getTaskTitle() + " Selected", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        holder.btnTaskDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION){
+                    tasks.remove(currentPosition);
+                    notifyItemRemoved(currentPosition);
+                    notifyItemRangeChanged(currentPosition, tasks.size()); // update
+                }
+
+            }
+        });
 
     }
 
@@ -57,13 +76,17 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private final TextView taskTitle, taskTime, taskDate;
+        View parent;
+        FloatingActionButton btnTaskDelete, btnTaskDone;
 
         public ViewHolder(@NonNull View itemView){
             super(itemView);
+            parent = itemView;
             taskTitle = itemView.findViewById(R.id.task);
             taskTime = itemView.findViewById(R.id.taskTime);
             taskDate = itemView.findViewById(R.id.taskDate);
-            itemView.findViewById(R.id.taskList);
+            btnTaskDelete = itemView.findViewById(R.id.btnTaskDelete);
+            btnTaskDone = itemView.findViewById(R.id.btnTaskDone);
         }
     }
 

@@ -68,7 +68,6 @@ public class CreateTasksDialogFragment extends DialogFragment {
                 .setPositiveButton("Save", (dialog, which) -> {
                     title = taskTitle.getText().toString().trim();
                        listener.onTaskAdded(title, selectedDate, selectedTime);
-
                     Toast.makeText(requireContext(), title+selectedTime+selectedDate, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {

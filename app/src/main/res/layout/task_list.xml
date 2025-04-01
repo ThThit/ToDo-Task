@@ -68,8 +68,6 @@
             android:backgroundTint="@color/red"
             android:contentDescription="Delete Task"
             android:src="@drawable/ic_bin" />
-
-
     </RelativeLayout>
 
 
