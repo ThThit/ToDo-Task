@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -24,10 +24,13 @@ import java.util.ArrayList;
 public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder> {
 
     private ArrayList<TaskList> tasks = new ArrayList<>();
+    // Fragment Activity
+    private FragmentActivity activity;
     private final Context context;
 
-    public TasksRecycleAdapter(Context context) {
+    public TasksRecycleAdapter(Context context, FragmentActivity activity) {
         this.context = context;
+        this.activity = activity;
     }
 
     @NonNull
@@ -49,33 +52,36 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
             public void onClick(View view) {
                 int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION){
-                    Toast.makeText(context, tasks.get(currentPosition).getTaskTitle() + " Selected", Toast.LENGTH_SHORT).show();
+                    // edit task
+                    CreateTasksFragment taskEdit = new CreateTasksFragment();
+
+                    taskEdit.show(activity.getSupportFragmentManager(), "Edit Task");
                 }
             }
         });
 
-        holder.btnTaskDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int currentPosition = holder.getAdapterPosition();
-                if (currentPosition != RecyclerView.NO_POSITION){
-                    // get from the current list
-                    ArrayList<TaskList> updateTaskList = loadTasks();
-                    // remove task
-                    if (currentPosition < updateTaskList.size()) {
-                        updateTaskList.remove(currentPosition);
-                        // save the list again
-                        saveTasks(updateTaskList);
-                        // update view
-                        tasks.remove(currentPosition);
-                        notifyItemRemoved(currentPosition);
-                        notifyItemRangeChanged(currentPosition, tasks.size());
-
-                    }
-                }
-                Toast.makeText(context, "Task Deleted", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        holder.btnTaskDelete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                int currentPosition = holder.getAdapterPosition();
+//                if (currentPosition != RecyclerView.NO_POSITION){
+//                    // get from the current list
+//                    ArrayList<TaskList> updateTaskList = loadTasks();
+//                    // remove task
+//                    if (currentPosition < updateTaskList.size()) {
+//                        updateTaskList.remove(currentPosition);
+//                        // save the list again
+//                        saveTasks(updateTaskList);
+//                        // update view
+//                        tasks.remove(currentPosition);
+//                        notifyItemRemoved(currentPosition);
+//                        notifyItemRangeChanged(currentPosition, tasks.size());
+//
+//                    }
+//                }
+//                Toast.makeText(context, "Task Deleted", Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
         holder.btnTaskDone.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,7 +155,6 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
             taskTitle = itemView.findViewById(R.id.task);
             taskTime = itemView.findViewById(R.id.taskTime);
             taskDate = itemView.findViewById(R.id.taskDate);
-            btnTaskDelete = itemView.findViewById(R.id.btnTaskDelete);
             btnTaskDone = itemView.findViewById(R.id.btnTaskDone);
         }
     }

@@ -52,22 +52,13 @@
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnTaskDone"
             android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_height="wrap_content"
-            android:layout_marginStart="70dp"
+            android:layout_marginStart="159dp"
             android:layout_toEndOf="@id/task"
             android:backgroundTint="@color/green"
             android:contentDescription="Finished Task"
             android:src="@drawable/ic_done" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnTaskDelete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="41dp"
-            android:layout_toEndOf="@id/btnTaskDone"
-            android:backgroundTint="@color/red"
-            android:contentDescription="Delete Task"
-            android:src="@drawable/ic_bin" />
     </RelativeLayout>
 
 

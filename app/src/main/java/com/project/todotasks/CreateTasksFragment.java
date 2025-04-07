@@ -3,9 +3,7 @@ package com.project.todotasks;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -19,18 +17,13 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
-public class CreateTasksDialogFragment extends DialogFragment {
+public class CreateTasksFragment extends DialogFragment {
 
     private EditText taskTitle;
 
@@ -69,10 +62,10 @@ public class CreateTasksDialogFragment extends DialogFragment {
         btnTime.setOnClickListener(v -> showTimePicker());
 
         builder.setView(view)
-                .setTitle("Create Task")
+                .setTitle("Task")
                 .setPositiveButton("Save", (dialog, which) -> {
                     title = taskTitle.getText().toString().trim();
-                    if (title != null && !title.isEmpty()){
+                    if (!title.isEmpty()){
                         TaskList newTask = new TaskList(title, selectedDate, selectedTime);
                         listener.onTaskAdded(newTask);
                     } else {

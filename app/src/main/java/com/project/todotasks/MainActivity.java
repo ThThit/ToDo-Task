@@ -15,31 +15,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentContainerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.sql.Time;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements CreateTasksDialogFragment.TaskDialogListener {
+public class MainActivity extends AppCompatActivity implements CreateTasksFragment.TaskDialogListener {
 
     private ArrayList<TaskList> tasksList = new ArrayList<>();
     private TasksRecycleAdapter tasksAdapter;
@@ -62,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksDialog
         tasksList = loadTasks();
 
         // view adapter
-        tasksAdapter = new TasksRecycleAdapter(this);
+        tasksAdapter = new TasksRecycleAdapter(this, this);
         tasksAdapter.setTasks(tasksList);
 
         MaterialToolbar topAppBar = findViewById(R.id.appMenuBar);
@@ -79,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksDialog
     }
     
     public void createTask(View view){
-        CreateTasksDialogFragment taskDialog = new CreateTasksDialogFragment();
+        CreateTasksFragment taskDialog = new CreateTasksFragment();
         taskDialog.show(getSupportFragmentManager(), "Add Task");
     }
 
