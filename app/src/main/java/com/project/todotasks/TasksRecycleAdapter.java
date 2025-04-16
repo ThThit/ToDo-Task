@@ -21,7 +21,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder> {
+public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder>  {
 
     private ArrayList<TaskList> tasks = new ArrayList<>();
     // Fragment Activity
@@ -54,35 +54,11 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
                 if (currentPosition != RecyclerView.NO_POSITION){
                     // edit task
                     CreateTasksFragment taskEdit = new CreateTasksFragment();
-
                     taskEdit.show(activity.getSupportFragmentManager(), "Edit Task");
                 }
             }
         });
-
-//        holder.btnTaskDelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                int currentPosition = holder.getAdapterPosition();
-//                if (currentPosition != RecyclerView.NO_POSITION){
-//                    // get from the current list
-//                    ArrayList<TaskList> updateTaskList = loadTasks();
-//                    // remove task
-//                    if (currentPosition < updateTaskList.size()) {
-//                        updateTaskList.remove(currentPosition);
-//                        // save the list again
-//                        saveTasks(updateTaskList);
-//                        // update view
-//                        tasks.remove(currentPosition);
-//                        notifyItemRemoved(currentPosition);
-//                        notifyItemRangeChanged(currentPosition, tasks.size());
-//
-//                    }
-//                }
-//                Toast.makeText(context, "Task Deleted", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
+        
         holder.btnTaskDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

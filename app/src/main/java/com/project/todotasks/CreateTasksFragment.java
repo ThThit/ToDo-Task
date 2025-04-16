@@ -3,7 +3,10 @@ package com.project.todotasks;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -20,15 +23,19 @@ import com.google.android.material.timepicker.TimeFormat;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Locale;
 
 public class CreateTasksFragment extends DialogFragment {
 
     private EditText taskTitle;
-
     private String title;
-    private String selectedDate = "", selectedTime = "";
+    private String selectedDate;
+    private LocalTime selectedTime;
+    private Button btnDate;
+    private Button btnTime;
+    private TaskList taskToEdit;
 
     public interface TaskDialogListener{
         void onTaskAdded(TaskList tasks);
@@ -55,18 +62,19 @@ public class CreateTasksFragment extends DialogFragment {
 
         // get ui elements
         taskTitle = view.findViewById(R.id.taskTitle);
-        Button btnDate = view.findViewById(R.id.btnEditDate);
-        Button btnTime = view.findViewById(R.id.btnEditTime);
+        btnDate = view.findViewById(R.id.btnEditDate);
+        btnTime = view.findViewById(R.id.btnEditTime);
 
-        btnDate.setOnClickListener(v ->showDatePicker());
-        btnTime.setOnClickListener(v -> showTimePicker());
+        btnDate.setOnClickListener(v ->showDatePicker(btnDate));
+        btnTime.setOnClickListener(v -> showTimePicker(btnTime));
 
         builder.setView(view)
                 .setTitle("Task")
                 .setPositiveButton("Save", (dialog, which) -> {
                     title = taskTitle.getText().toString().trim();
+                    String time = selectedTime.toString();
                     if (!title.isEmpty()){
-                        TaskList newTask = new TaskList(title, selectedDate, selectedTime);
+                        TaskList newTask = new TaskList(title, selectedDate, time);
                         listener.onTaskAdded(newTask);
                     } else {
                         Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
@@ -78,7 +86,7 @@ public class CreateTasksFragment extends DialogFragment {
         return  builder.create();
     }
 
-    private void showTimePicker() {
+    private void showTimePicker(Button button) {
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
                 .setTitleText("Set Time")
                 .setTimeFormat(TimeFormat.CLOCK_12H)
@@ -86,19 +94,29 @@ public class CreateTasksFragment extends DialogFragment {
                 .setMinute(0)
                 .setInputMode(com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_CLOCK)
                 .build();
-        timePicker.addOnPositiveButtonClickListener(view -> selectedTime = MessageFormat.format("{0}:{1}",
-                String.format(Locale.getDefault(), "%02d", timePicker.getHour()),
-                String.format(Locale.getDefault(), "%02d", timePicker.getMinute())
-                ));
+        timePicker.addOnPositiveButtonClickListener(view -> {
+           // get time
+           int hour = timePicker.getHour();
+           int minute = timePicker.getMinute();
+
+           // format for hour:mins:sec
+            selectedTime = LocalTime.of(hour, minute);
+            Log.d("TimePicker", "Selected LocalTime: " + selectedTime.toString());
+            button.setText(selectedTime.toString());
+        });
         timePicker.show(requireActivity().getSupportFragmentManager(), "tag");
     }
 
-    private void showDatePicker() {
+    private void showDatePicker(Button button) {
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Set Date")
                 .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
                 .build();
-        datePicker.addOnPositiveButtonClickListener(selection -> selectedDate = new SimpleDateFormat("MM-dd-yy", Locale.getDefault()).format(new Date(selection)));
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+           SimpleDateFormat sft_date = new SimpleDateFormat("dd-MM-yy", Locale.getDefault());
+           selectedDate = sft_date.format(new Date(selection));
+           button.setText(selectedDate);
+        });
         datePicker.show(requireActivity().getSupportFragmentManager(), "tag");
     }
 
