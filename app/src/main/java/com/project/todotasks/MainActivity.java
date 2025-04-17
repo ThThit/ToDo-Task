@@ -121,6 +121,14 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
     @Override
     public void onTaskUpdated(TaskList task, int position) {
-        tasksAdapter.updateTask(task, position);
+        ArrayList<TaskList> currentTasks = loadTasks();
+        // update the selected task
+        if (position >0 && position < currentTasks.size()){
+            currentTasks.set(position, task);
+
+            // update to sharepreferences
+            saveTasks(currentTasks);
+            tasksAdapter.updateTask(task, position);
+        }
     }
 }
