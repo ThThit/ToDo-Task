@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         if (position >0 && position < currentTasks.size()){
             currentTasks.set(position, task);
 
-            // update to sharepreferences
+            // update to share preferences
             saveTasks(currentTasks);
             tasksAdapter.updateTask(task, position);
         }

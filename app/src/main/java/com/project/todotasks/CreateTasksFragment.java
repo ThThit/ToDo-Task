@@ -3,9 +3,7 @@ package com.project.todotasks;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +19,6 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.Date;
@@ -31,7 +28,6 @@ public class CreateTasksFragment extends DialogFragment {
 
     private EditText taskTitle;
 
-    public TaskList tasks;
     private String title;
     private String selectedDate;
     private String selectedTime;
@@ -65,7 +61,7 @@ public class CreateTasksFragment extends DialogFragment {
         try {
             listener = (TaskDialogListener) context;
         } catch (ClassCastException e){
-            throw new ClassCastException(context.toString() + " implement TaskDialogListener");
+            throw new ClassCastException(context + " implement TaskDialogListener");
         }
     }
 
@@ -111,9 +107,7 @@ public class CreateTasksFragment extends DialogFragment {
                         Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    dialog.dismiss();
-                });
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return  builder.create();
     }
 
@@ -133,7 +127,7 @@ public class CreateTasksFragment extends DialogFragment {
            // format for hour:mins:sec
             selectedTime = String.valueOf(LocalTime.of(hour, minute));
             Log.d("TimePicker", "Selected LocalTime: " + selectedTime);
-            button.setText(selectedTime.toString());
+            button.setText(selectedTime);
         });
         timePicker.show(requireActivity().getSupportFragmentManager(), "tag");
     }
