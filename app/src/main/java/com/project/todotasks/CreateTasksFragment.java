@@ -30,17 +30,33 @@ import java.util.Locale;
 public class CreateTasksFragment extends DialogFragment {
 
     private EditText taskTitle;
+
+    public TaskList tasks;
     private String title;
     private String selectedDate;
-    private LocalTime selectedTime;
+    private String selectedTime;
     private Button btnDate;
     private Button btnTime;
-    private TaskList taskToEdit;
+    private TaskList taskToEdit = null;
+    private int editPosition = -1;
+
+    public void setTaskToEdit(TaskList task, int position) {
+        this.taskToEdit = task;
+        this.editPosition = position;
+    }
 
     public interface TaskDialogListener{
         void onTaskAdded(TaskList tasks);
+
+        void onTaskUpdated(TaskList newTask, int editPosition);
     }
+
+    
     private TaskDialogListener listener;
+
+    public void setListener(TaskDialogListener listener) {
+        this.listener = listener;
+    }
 
     // connect the listener to the context
     @Override
@@ -68,14 +84,29 @@ public class CreateTasksFragment extends DialogFragment {
         btnDate.setOnClickListener(v ->showDatePicker(btnDate));
         btnTime.setOnClickListener(v -> showTimePicker(btnTime));
 
+        // condition for edit task
+        if (taskToEdit != null){
+            taskTitle.setText(taskToEdit.getTaskTitle());
+            btnTime.setText((taskToEdit.getTaskDate()));
+            btnDate.setText((taskToEdit.getTaskTime()));
+
+            selectedDate = taskToEdit.getTaskDate();
+            selectedTime = taskToEdit.getTaskTime();
+        }
+
         builder.setView(view)
                 .setTitle("Task")
                 .setPositiveButton("Save", (dialog, which) -> {
-                    title = taskTitle.getText().toString().trim();
-                    String time = selectedTime.toString();
+                    title = taskTitle.getText() != null ? taskTitle.getText().toString().trim() : "";
+                    String time = selectedTime != null ? selectedTime : "";
                     if (!title.isEmpty()){
                         TaskList newTask = new TaskList(title, selectedDate, time);
-                        listener.onTaskAdded(newTask);
+                        // 🛠 Check if we're editing or adding
+                        if (taskToEdit != null && editPosition != -1) {
+                            listener.onTaskUpdated(newTask, editPosition); // 🔄 update
+                        } else {
+                            listener.onTaskAdded(newTask); // ➕ add
+                        }
                     } else {
                         Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
                     }
@@ -100,8 +131,8 @@ public class CreateTasksFragment extends DialogFragment {
            int minute = timePicker.getMinute();
 
            // format for hour:mins:sec
-            selectedTime = LocalTime.of(hour, minute);
-            Log.d("TimePicker", "Selected LocalTime: " + selectedTime.toString());
+            selectedTime = String.valueOf(LocalTime.of(hour, minute));
+            Log.d("TimePicker", "Selected LocalTime: " + selectedTime);
             button.setText(selectedTime.toString());
         });
         timePicker.show(requireActivity().getSupportFragmentManager(), "tag");

@@ -118,4 +118,9 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         saveTasks(tasksList);
         tasksAdapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void onTaskUpdated(TaskList task, int position) {
+        tasksAdapter.updateTask(task, position);
+    }
 }

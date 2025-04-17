@@ -21,6 +21,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
+import kotlinx.coroutines.scheduling.Task;
+
 public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder>  {
 
     private ArrayList<TaskList> tasks = new ArrayList<>();
@@ -53,8 +55,14 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
                 int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION){
                     // edit task
+                    TaskList task = tasks.get(currentPosition);
                     CreateTasksFragment taskEdit = new CreateTasksFragment();
+                    taskEdit.setTaskToEdit(task, currentPosition); // pass task and index
+                    if (activity instanceof CreateTasksFragment.TaskDialogListener) {
+                        taskEdit.setListener((CreateTasksFragment.TaskDialogListener) activity);
+                    }
                     taskEdit.show(activity.getSupportFragmentManager(), "Edit Task");
+                    Toast.makeText(context, taskList.getTaskTitle().toString(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -135,4 +143,8 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
         }
     }
 
+    public void updateTask(TaskList updateTask, int position){
+        tasks.set(position, updateTask);
+        notifyItemChanged(position);
+    }
 }

@@ -27,10 +27,6 @@ public class TaskList {
         this.taskTitle = taskTitle;
     }
 
-    public void setTaskTime(String taskTime) {
-        this.taskTime = taskTime;
-    }
-
     public void setTaskDate(String taskDate) {
         this.taskDate = taskDate;
     }
