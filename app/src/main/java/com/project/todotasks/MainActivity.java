@@ -2,11 +2,14 @@ package com.project.todotasks;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
     private TasksRecycleAdapter tasksAdapter;
 
     private final String CHANNEL_ID = "task_status";
+    private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +57,12 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         // for notification
+        requestNotificationPermission();
         createNotificationChannel();
 
         RecyclerView taskViewRecycle = findViewById(R.id.taskView);
-        FloatingActionButton btnAddTask = findViewById(R.id.btnNewTask);
 
         // load from shared preferences
         tasksList = loadTasks();
@@ -146,29 +151,56 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         }
     }
 
-    // notifications
-    private void createNotificationChannel(){
-        NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                "My channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-        );
-        channel.setDescription("Task Reminder");
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
-    }
-
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    private void taskRemindNotification(String dateStr, String timeStr) throws ParseException{
-        // request permission
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        if (!alarmManager.canScheduleExactAlarms()) {
-            // request direct permission to settings
-            Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-            intent.setData(Uri.parse("package: " + getPackageName()));
-            startActivity(intent);
-            Toast.makeText(this, "Please allow 'Exact Alarms' permission in settings.", Toast.LENGTH_LONG).show();
-            return;
+    // request notification permission
+    private void requestNotificationPermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}
+                        ,REQUEST_NOTIFICATION_PERMISSION
+                );
+            }
         }
     }
+
+    // handle request
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_NOTIFICATION_PERMISSION){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
+                openAppNotificationSettings();
+            }
+        }
+    }
+
+    // open notification setting directly
+    private void openAppNotificationSettings() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        startActivity(intent);
+    }
+
+    // notifications
+    private void createNotificationChannel(){
+        NotificationChannel taskReminderChannel = new NotificationChannel(
+                CHANNEL_ID,
+                "Reminders",
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+        // channel initial settings
+        taskReminderChannel.setLightColor(Color.GREEN);
+        taskReminderChannel.setDescription("Task Reminder");
+
+        // submit to notification manager
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        nm.createNotificationChannel(taskReminderChannel);
+    }
+
+    // display notification
+
 }
