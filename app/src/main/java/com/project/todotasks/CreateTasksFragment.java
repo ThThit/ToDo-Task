@@ -1,8 +1,11 @@
 package com.project.todotasks;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,48 +23,52 @@ import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class CreateTasksFragment extends DialogFragment {
 
     private EditText taskTitle;
-
-    private String title;
-    private String selectedDate;
-    private String selectedTime;
     private Button btnDate;
     private Button btnTime;
+
+    private String title;
+    private String selectedDate; // Stores "yyyy-MM-dd"
+    private String selectedTime; // Stores "HH:mm"
+
     private TaskList taskToEdit = null;
     private int editPosition = -1;
+
+    // Hardcoded strings instead of resources
+    private static final String BUTTON_TEXT_SELECT_DATE = "Select Date";
+    private static final String BUTTON_TEXT_SELECT_TIME = "Select Time";
+    private static final String DIALOG_TITLE_ADD = "Add Task";
+    private static final String DIALOG_TITLE_EDIT = "Edit Task";
+    private static final String PICKER_TITLE_DATE = "Set Date";
+    private static final String PICKER_TITLE_TIME = "Set Time";
+
 
     public void setTaskToEdit(TaskList task, int position) {
         this.taskToEdit = task;
         this.editPosition = position;
     }
 
-    public interface TaskDialogListener{
+    public interface TaskDialogListener {
         void onTaskAdded(TaskList tasks);
-
         void onTaskUpdated(TaskList newTask, int editPosition);
     }
 
-    
+
     private TaskDialogListener listener;
 
-    public void setListener(TaskDialogListener listener) {
-        this.listener = listener;
-    }
-
-    // connect the listener to the context
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             listener = (TaskDialogListener) context;
-        } catch (ClassCastException e){
-            throw new ClassCastException(context + " implement TaskDialogListener");
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context + " must implement TaskDialogListener");
         }
     }
 
@@ -72,77 +79,131 @@ public class CreateTasksFragment extends DialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_create_tasks, null);
 
-        // get ui elements
+        // Get UI elements
         taskTitle = view.findViewById(R.id.taskTitle);
         btnDate = view.findViewById(R.id.btnEditDate);
         btnTime = view.findViewById(R.id.btnEditTime);
 
-        btnDate.setOnClickListener(v ->showDatePicker(btnDate));
+        btnDate.setOnClickListener(v -> showDatePicker(btnDate));
         btnTime.setOnClickListener(v -> showTimePicker(btnTime));
 
-        // condition for edit task
-        if (taskToEdit != null){
+        // Condition for edit task
+        if (taskToEdit != null) {
             taskTitle.setText(taskToEdit.getTaskTitle());
-            btnTime.setText((taskToEdit.getTaskDate()));
-            btnDate.setText((taskToEdit.getTaskTime()));
+            selectedDate = taskToEdit.getTaskDateString();
+            selectedTime = taskToEdit.getTaskTimeString();
 
-            selectedDate = taskToEdit.getTaskDate();
-            selectedTime = taskToEdit.getTaskTime();
+            btnDate.setText(selectedDate != null ? selectedDate : BUTTON_TEXT_SELECT_DATE);
+            btnTime.setText(selectedTime != null ? selectedTime : BUTTON_TEXT_SELECT_TIME);
+        } else {
+            // Set default text for buttons using hardcoded strings
+            btnDate.setText(BUTTON_TEXT_SELECT_DATE);
+            btnTime.setText(BUTTON_TEXT_SELECT_TIME);
         }
 
         builder.setView(view)
-                .setTitle("Task")
+                .setTitle(taskToEdit == null ? DIALOG_TITLE_ADD : DIALOG_TITLE_EDIT)
                 .setPositiveButton("Save", (dialog, which) -> {
                     title = taskTitle.getText() != null ? taskTitle.getText().toString().trim() : "";
-                    String time = selectedTime != null ? selectedTime : "";
-                    if (!title.isEmpty()){
-                        TaskList newTask = new TaskList(title, selectedDate, time);
-                        // 🛠 Check if we're editing or adding
-                        if (taskToEdit != null && editPosition != -1) {
-                            listener.onTaskUpdated(newTask, editPosition); // 🔄 update
-                        } else {
-                            listener.onTaskAdded(newTask); // ➕ add
-                        }
-                    } else {
+
+                    // Basic validation
+                    if (title.isEmpty()) {
                         Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
+                        return; // Don't proceed
+                    }
+                    if (selectedDate == null || selectedDate.isEmpty()) {
+                        Toast.makeText(requireContext(), "Please select a date", Toast.LENGTH_SHORT).show();
+                        return; // Don't proceed
+                    }
+                    if (selectedTime == null || selectedTime.isEmpty()) {
+                        Toast.makeText(requireContext(), "Please select a time", Toast.LENGTH_SHORT).show();
+                        return; // Don't proceed
+                    }
+
+                    TaskList newTask = new TaskList(title, selectedDate, selectedTime);
+
+                    // Check if we're editing or adding
+                    if (taskToEdit != null && editPosition != -1) {
+                        listener.onTaskUpdated(newTask, editPosition); // Update
+                    } else {
+                        listener.onTaskAdded(newTask); // Add
                     }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        return  builder.create();
+        return builder.create();
     }
 
     private void showTimePicker(Button button) {
-        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTitleText("Set Time")
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(12)
-                .setMinute(0)
-                .setInputMode(com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_CLOCK)
-                .build();
-        timePicker.addOnPositiveButtonClickListener(view -> {
-           // get time
-           int hour = timePicker.getHour();
-           int minute = timePicker.getMinute();
+        // Determine initial hour/minute
+        int initialHour = 12;
+        int initialMinute = 0;
+        if (selectedTime != null && selectedTime.contains(":")) {
+            try {
+                String[] parts = selectedTime.split(":");
+                initialHour = Integer.parseInt(parts[0]);
+                initialMinute = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                Log.e("TimePicker", "Error parsing existing time: " + selectedTime, e);
+            }
+        }
 
-           // format for hour:mins:sec
-            selectedTime = String.valueOf(LocalTime.of(hour, minute));
-            Log.d("TimePicker", "Selected LocalTime: " + selectedTime);
-            button.setText(selectedTime);
+        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                .setTitleText(PICKER_TITLE_TIME) // Use hardcoded string
+                .setTimeFormat(TimeFormat.CLOCK_12H) // Or CLOCK_24H
+                .setHour(initialHour)
+                .setMinute(initialMinute)
+                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+                .build();
+
+        timePicker.addOnPositiveButtonClickListener(view -> {
+            int hour = timePicker.getHour();
+            int minute = timePicker.getMinute();
+
+            // Format hour and minute to HH:mm
+            selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hour, minute);
+            Log.d("TimePicker", "Selected Time: " + selectedTime);
+            button.setText(formatDisplayTime(hour, minute));
         });
-        timePicker.show(requireActivity().getSupportFragmentManager(), "tag");
+        timePicker.show(getParentFragmentManager(), "TimePicker");
     }
 
     private void showDatePicker(Button button) {
+        // Determine initial selection
+        long initialSelection = MaterialDatePicker.todayInUtcMilliseconds();
+        if (selectedDate != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = sdf.parse(selectedDate);
+                if (date != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(date);
+                    initialSelection = cal.getTimeInMillis();
+                }
+            } catch (Exception e) {
+                Log.e("DatePicker", "Error parsing existing date: " + selectedDate, e);
+            }
+        }
+
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Set Date")
-                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setTitleText(PICKER_TITLE_DATE) //
+                .setSelection(initialSelection)
                 .build();
+
         datePicker.addOnPositiveButtonClickListener(selection -> {
-           SimpleDateFormat sft_date = new SimpleDateFormat("dd-MM-yy", Locale.getDefault());
-           selectedDate = sft_date.format(new Date(selection));
-           button.setText(selectedDate);
+            SimpleDateFormat sft_date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            selectedDate = sft_date.format(new Date(selection));
+            Log.d("DatePicker", "Selected Date: " + selectedDate);
+            button.setText(selectedDate);
         });
-        datePicker.show(requireActivity().getSupportFragmentManager(), "tag");
+        datePicker.show(getParentFragmentManager(), "DatePicker");
     }
 
+    // display time in 12-hour format with AM/PM
+    private String formatDisplayTime(int hour, int minute) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        SimpleDateFormat sdfDisplay = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        return sdfDisplay.format(calendar.getTime());
+    }
 }
