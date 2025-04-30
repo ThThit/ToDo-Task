@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
     private static final String TAG = "MainActivity";
     private static final String SHARED_PREFS_NAME = "MyTasksPrefs";
     private static final String TASK_LIST_KEY = "task_list";
+    private static final String COMPLETE_TASK_LIST_KEY = "complete_task_list";
     private static final String CHANNEL_ID = "task_reminder_channel";
 
     // Hardcoded strings instead of resources for Notification Channel
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
 
     private ArrayList<TaskList> tasksList = new ArrayList<>();
+    private ArrayList<CompleteTasks> completeTasks = new ArrayList<>();
     private TasksRecycleAdapter tasksAdapter;
     private RecyclerView taskViewRecycle;
     private AlarmManager alarmManager;
@@ -109,9 +111,10 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         FloatingActionButton fabAddTask = findViewById(R.id.btnNewTask);
 
         tasksList = loadTasks();
+        completeTasks = loadCompleteTasks();
         Log.d(TAG, "Loaded " + tasksList.size() + " tasks.");
 
-        tasksAdapter = new TasksRecycleAdapter(this, this, tasksList);
+        tasksAdapter = new TasksRecycleAdapter(this, this, tasksList, completeTasks);
         taskViewRecycle.setAdapter(tasksAdapter);
         taskViewRecycle.setLayoutManager(new LinearLayoutManager(this));
 
@@ -153,6 +156,16 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         editor.apply();
     }
 
+    private void saveCompleteTasks(ArrayList<CompleteTasks> completeTasks){
+        SharedPreferences sharedPreferences =  getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(completeTasks);
+        Log.d(TAG, "Saving complete tasks from adapter: " + json);
+        editor.putString(COMPLETE_TASK_LIST_KEY, json);
+        editor.apply();
+    }
+
     private ArrayList<TaskList> loadTasks() {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
         String json = sharedPreferences.getString(TASK_LIST_KEY, null);
@@ -164,6 +177,24 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
                 return loadedTasks != null ? loadedTasks : new ArrayList<>();
             } catch (Exception e) {
                 Log.e(TAG, "Error loading tasks from JSON", e);
+                return new ArrayList<>();
+            }
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    private ArrayList<CompleteTasks> loadCompleteTasks(){
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString(COMPLETE_TASK_LIST_KEY, null);
+        if (json != null) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<CompleteTasks>>() {}.getType();
+            try {
+                ArrayList<CompleteTasks> loadedTasks = gson.fromJson(json, type);
+                return loadedTasks != null ? loadedTasks : new ArrayList<>();
+            } catch (Exception e){
+                Log.e(TAG, "Error lading tasks from JSON complete", e);
                 return new ArrayList<>();
             }
         } else {

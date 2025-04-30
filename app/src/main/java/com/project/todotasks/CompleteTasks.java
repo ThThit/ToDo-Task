@@ -1,5 +1,7 @@
 package com.project.todotasks;
 
+import androidx.annotation.NonNull;
+
 import java.time.LocalDateTime;
 
 public class CompleteTasks {
@@ -7,6 +9,17 @@ public class CompleteTasks {
     private String taskTime;
     private String taskDate;
     private LocalDateTime finishTime;
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "CompleteTasks{" +
+                "taskTitle='" + taskTitle + '\'' +
+                ", taskTime='" + taskTime + '\'' +
+                ", taskDate='" + taskDate + '\'' +
+                ", finishTime=" + finishTime +
+                '}';
+    }
 
     public CompleteTasks(String taskTitle, String taskTime, String taskDate, LocalDateTime finishTime) {
         this.taskTitle = taskTitle;

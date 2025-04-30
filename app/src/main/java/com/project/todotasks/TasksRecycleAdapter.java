@@ -17,32 +17,33 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder> {
 
     private static final String TAG = "TasksRecycleAdapter";
     private static final String SHARED_PREFS_NAME = "MyTasksPrefs";
     private static final String TASK_LIST_KEY = "task_list";
+    private static final String COMPLETE_TASK_LIST_KEY = "complete_task_list";
 
     private ArrayList<TaskList> tasks; // Keep local copy for adapter
+    private ArrayList<CompleteTasks> completeTasks;
     private final Context context;
     private final FragmentActivity activity; // Host activity for showing dialogs
 
     // Constructor takes initial list
-    public TasksRecycleAdapter(Context context, FragmentActivity activity, ArrayList<TaskList> initialTasks) {
+    public TasksRecycleAdapter(Context context, FragmentActivity activity, ArrayList<TaskList> initialTasks, ArrayList<CompleteTasks> initialCompleteTasks) {
         this.context = context;
         this.activity = activity;
-        this.tasks = new ArrayList<>(initialTasks); // Create a mutable copy
+        this.tasks = new ArrayList<>(initialTasks);
+        this.completeTasks = new ArrayList<>(initialCompleteTasks); // Create a mutable copy
     }
 
     @NonNull
@@ -80,24 +81,31 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
             if (currentPosition != RecyclerView.NO_POSITION) {
                 Log.d(TAG, "Deleting task at pos " + currentPosition);
 
-                // --- IMPORTANT: Cancel the Alarm BEFORE removing ---
+                // Cancel the Alarm BEFORE removing ---
                 cancelAlarm(context, currentPosition);
 
                 // Remove from adapter's list
                 TaskList removedTask = tasks.remove(currentPosition);
+
+                // get the completed time
+                LocalDateTime finishTime = LocalDateTime.now();
+
+                // add to complete task
+                CompleteTasks completeTask =  new CompleteTasks(
+                        removedTask.getTaskTitle(),
+                        removedTask.getTaskTimeString(),
+                        removedTask.getTaskDateString(),
+                        finishTime);
+                completeTasks.add(completeTask);
+                saveCompleteTasks(completeTasks);
+
                 notifyItemRemoved(currentPosition);
                 // Notify subsequent items about position change
                 notifyItemRangeChanged(currentPosition, tasks.size() - currentPosition);
 
-
-                // Save the updated list (without the removed task) to SharedPreferences
-                saveTasks(tasks); // Save the adapter's current list state
-
+                // Save the updated list  to SharedPreferences
+                saveTasks(tasks);
                 Toast.makeText(context, "Task '" + removedTask.getTaskTitle() + "' Done", Toast.LENGTH_SHORT).show();
-
-                // Note: We are now saving the adapter's list. No need to load/modify/save separately.
-                // Make sure MainActivity's list is also updated if it's used elsewhere directly.
-                // Currently, MainActivity reloads on start and gets updates via listener, which should be okay.
             }
         });
     }
@@ -143,27 +151,15 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
         editor.apply();
     }
 
-    // Load tasks (might not be needed here if MainActivity handles initial load)
-    /*
-    private ArrayList<TaskList> loadTasks() {
+    private void saveCompleteTasks(ArrayList<CompleteTasks> completeTasks){
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
-        String json = sharedPreferences.getString(TASK_LIST_KEY, null);
-        if (json != null) {
-            Gson gson = new Gson();
-            Type type = new TypeToken<ArrayList<TaskList>>() {}.getType();
-            try {
-                 ArrayList<TaskList> loaded = gson.fromJson(json, type);
-                 return loaded != null ? loaded : new ArrayList<>();
-            } catch (Exception e) {
-                Log.e(TAG, "Error loading tasks in adapter", e);
-                return new ArrayList<>();
-            }
-        } else {
-            return new ArrayList<>();
-        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(completeTasks);
+        Log.d(TAG, "Saving complete tasks from adapter: " + json);
+        editor.putString(COMPLETE_TASK_LIST_KEY, json);
+        editor.apply();
     }
-    */
-
 
     // --- Alarm Cancellation Helper ---
     private void cancelAlarm(Context context, int requestCode) {
@@ -242,6 +238,10 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
             Log.e(TAG, "Error formatting display time: " + timeString_HHmm, e);
             return timeString_HHmm; // Fallback
         }
+    }
+
+    public void setCompleteTasks(ArrayList<CompleteTasks> completeTasks) {
+        this.completeTasks = completeTasks;
     }
 
     // --- ViewHolder ---
