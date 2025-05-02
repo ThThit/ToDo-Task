@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -32,6 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -63,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
     private TasksRecycleAdapter tasksAdapter;
     private RecyclerView taskViewRecycle;
     private AlarmManager alarmManager;
+    private MaterialButtonToggleGroup filterButtonGroup;
+    private Button btnOngoing;
+    private Button btnCompleted;
 
     // --- ActivityResultLaunchers (Permission Handling) ---
     private final ActivityResultLauncher<String> requestPermissionLauncher =
@@ -109,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
         taskViewRecycle = findViewById(R.id.taskView);
         FloatingActionButton fabAddTask = findViewById(R.id.btnNewTask);
+        filterButtonGroup = findViewById(R.id.filterButtonGroup);
+        btnOngoing = findViewById(R.id.btnOngoing);
+        btnCompleted = findViewById(R.id.btnCompleted);
 
         tasksList = loadTasks();
         completeTasks = loadCompleteTasks();
@@ -124,6 +132,9 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         setSupportActionBar(topAppBar);
 
         fabAddTask.setOnClickListener(this::createTask);
+
+        // select the "Ongoing" button on activity start
+        filterButtonGroup.check(R.id.btnOngoing);
     }
 
     public void createTask(View view) {
