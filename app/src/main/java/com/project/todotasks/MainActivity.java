@@ -1,6 +1,7 @@
 package com.project.todotasks;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -43,6 +44,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -83,13 +85,11 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
     private final ActivityResultLauncher<Intent> requestExactAlarmLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager.canScheduleExactAlarms()) {
-                        Toast.makeText(this, "Exact alarm permission granted.", Toast.LENGTH_SHORT).show();
-                        scheduleAllTaskNotifications(this, tasksList);
-                    } else {
-                        Toast.makeText(this, "Exact alarm permission still denied. Reminders may be delayed.", Toast.LENGTH_LONG).show();
-                    }
+                if (alarmManager.canScheduleExactAlarms()) {
+                    Toast.makeText(this, "Exact alarm permission granted.", Toast.LENGTH_SHORT).show();
+                    scheduleAllTaskNotifications(this, tasksList);
+                } else {
+                    Toast.makeText(this, "Exact alarm permission still denied. Reminders may be delayed.", Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         requestNotificationPermissionIfNeeded();
 
         taskViewRecycle = findViewById(R.id.taskView);
-        FloatingActionButton fabAddTask = findViewById(R.id.btnNewTask);
+        ExtendedFloatingActionButton fabAddTask = findViewById(R.id.btnNewTask);
         filterButtonGroup = findViewById(R.id.filterButtonGroup);
         btnOngoing = findViewById(R.id.btnOngoing);
         btnCompleted = findViewById(R.id.btnCompleted);
@@ -185,7 +185,13 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
             Type type = new TypeToken<ArrayList<TaskList>>() {}.getType();
             try {
                 ArrayList<TaskList> loadedTasks = gson.fromJson(json, type);
-                return loadedTasks != null ? loadedTasks : new ArrayList<>();
+                if (loadedTasks != null){
+                    // sort the list by date and time
+                    Collections.sort(loadedTasks);
+                    return loadedTasks;
+                } else {
+                    return new ArrayList<>();
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Error loading tasks from JSON", e);
                 return new ArrayList<>();
@@ -214,26 +220,37 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
     }
 
     // --- TaskDialogListener Implementation ---
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onTaskAdded(TaskList task) {
         tasksList.add(task);
+        // sort the list after added
+        Collections.sort(tasksList);
         saveTasks(tasksList);
-        // Update adapter's internal list and notify UI
-        tasksAdapter.addTask(task); // Let adapter handle its list and notifyItemInserted
+        // Update adapter's with sorted list and notify
+        tasksAdapter.setTasks(tasksList);
+        tasksAdapter.notifyDataSetChanged();
         Log.d(TAG, "Task Added: " + task.getTaskTitle());
         scheduleSingleTaskNotification(this, task, tasksList.size() - 1);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onTaskUpdated(TaskList task, int position) {
         if (position >= 0 && position < tasksList.size()) {
             cancelAlarm(this, position); // Cancel old alarm
             tasksList.set(position, task); // Update MainActivity's list
-            saveTasks(tasksList); // Save the updated list
+            Collections.sort(tasksList);
+            saveTasks(tasksList); // Save the updated and sorted list
+
+            tasksAdapter.setTasks(tasksList);
             // Update adapter's internal list and notify UI
-            tasksAdapter.updateTask(task, position); // Let adapter handle its list and notifyItemChanged
+            tasksAdapter.notifyDataSetChanged();
+
+            // Find the new index of the updated task (since sorting may change its position)
+            int newPosition = tasksList.indexOf(task);
             Log.d(TAG, "Task Updated at position " + position + ": " + task.getTaskTitle());
-            scheduleSingleTaskNotification(this, task, position); // Schedule updated task
+            scheduleSingleTaskNotification(this, task, newPosition); // Schedule updated task
         } else {
             Log.e(TAG, "Invalid position for task update: " + position);
         }
@@ -241,59 +258,50 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
     // --- Notification Permission Handling ---
     private void requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                    PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Notification permission already granted.");
-                checkExactAlarmPermission();
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // Consider showing a dialog explaining why the permission is needed
-                Toast.makeText(this, "Please grant notification permission for reminders.", Toast.LENGTH_LONG).show();
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-            } else {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        } else {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Notification permission already granted.");
             checkExactAlarmPermission();
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+            // Consider showing a dialog explaining why the permission is needed
+            Toast.makeText(this, "Please grant notification permission for reminders.", Toast.LENGTH_LONG).show();
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
         }
     }
 
     private void checkExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (alarmManager == null) alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.w(TAG, "Exact alarm permission not granted. Requesting...");
-                Toast.makeText(this, "App needs permission to schedule exact alarms for reminders.", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                try {
-                    requestExactAlarmLauncher.launch(intent);
-                } catch (Exception e) {
-                    Log.e(TAG, "Could not launch request exact alarm settings", e);
-                    Toast.makeText(this, "Could not open exact alarm settings.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Log.d(TAG, "Exact alarm permission already granted.");
+        if (alarmManager == null)
+            alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (!alarmManager.canScheduleExactAlarms()) {
+            Log.w(TAG, "Exact alarm permission not granted. Requesting...");
+            Toast.makeText(this, "App needs permission to schedule exact alarms for reminders.", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+            try {
+                requestExactAlarmLauncher.launch(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Could not launch request exact alarm settings", e);
+                Toast.makeText(this, "Could not open exact alarm settings.", Toast.LENGTH_SHORT).show();
             }
+        } else {
+            Log.d(TAG, "Exact alarm permission already granted.");
         }
     }
 
     // --- Create Notification Channel ---
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Use hardcoded strings
-            CharSequence name = NOTIFICATION_CHANNEL_NAME;
-            String description = NOTIFICATION_CHANNEL_DESC;
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            channel.setLightColor(Color.GREEN);
-            channel.enableVibration(true);
+        // Use hardcoded strings
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, importance);
+        channel.setDescription(NOTIFICATION_CHANNEL_DESC);
+        channel.setLightColor(Color.GREEN);
+        channel.enableVibration(true);
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
-                Log.d(TAG, "Notification channel created.");
-            }
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        if (notificationManager != null) {
+            notificationManager.createNotificationChannel(channel);
+            Log.d(TAG, "Notification channel created.");
         }
     }
 
@@ -308,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
             return;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+        if (!alarmManager.canScheduleExactAlarms()) {
             Log.w(TAG, "Cannot schedule exact alarm: permission denied for task: " + task.getTaskTitle());
             return;
         }
