@@ -1,6 +1,4 @@
 package com.project.todotasks;
-
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -13,41 +11,38 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
-
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class CreateTasksFragment extends DialogFragment {
 
-    private EditText taskTitle;
+    private TextInputEditText taskTitle;
     private Button btnDate;
     private Button btnTime;
-
+    private Button btnSave;
+    private Button btnCancle;
     private String title;
     private String selectedDate; // Stores "yyyy-MM-dd"
     private String selectedTime; // Stores "HH:mm"
-
     private TaskList taskToEdit = null;
     private int editPosition = -1;
 
-    // Hardcoded strings instead of resources
     private static final String BUTTON_TEXT_SELECT_DATE = "Select Date";
     private static final String BUTTON_TEXT_SELECT_TIME = "Select Time";
     private static final String DIALOG_TITLE_ADD = "Add Task";
     private static final String DIALOG_TITLE_EDIT = "Edit Task";
     private static final String PICKER_TITLE_DATE = "Set Date";
     private static final String PICKER_TITLE_TIME = "Set Time";
-
 
     public void setTaskToEdit(TaskList task, int position) {
         this.taskToEdit = task;
@@ -58,8 +53,6 @@ public class CreateTasksFragment extends DialogFragment {
         void onTaskAdded(TaskList tasks);
         void onTaskUpdated(TaskList newTask, int editPosition);
     }
-
-
     private TaskDialogListener listener;
 
     @Override
@@ -78,21 +71,21 @@ public class CreateTasksFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.CustomAlertDialog);
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_create_tasks, null);
-
         // Get UI elements
         taskTitle = view.findViewById(R.id.taskTitle);
         btnDate = view.findViewById(R.id.btnEditDate);
         btnTime = view.findViewById(R.id.btnEditTime);
-
+        btnSave = view.findViewById(R.id.btnSaveTask);
+        btnCancle = view.findViewById(R.id.btnCancelTask);
         btnDate.setOnClickListener(v -> showDatePicker(btnDate));
         btnTime.setOnClickListener(v -> showTimePicker(btnTime));
+
 
         // Condition for edit task
         if (taskToEdit != null) {
             taskTitle.setText(taskToEdit.getTaskTitle());
             selectedDate = taskToEdit.getTaskDateString();
             selectedTime = taskToEdit.getTaskTimeString();
-
             btnDate.setText(selectedDate != null ? selectedDate : BUTTON_TEXT_SELECT_DATE);
             btnTime.setText(selectedTime != null ? selectedTime : BUTTON_TEXT_SELECT_TIME);
         } else {
@@ -101,42 +94,49 @@ public class CreateTasksFragment extends DialogFragment {
             btnTime.setText(BUTTON_TEXT_SELECT_TIME);
         }
 
-        builder.setView(view)
-                .setTitle(taskToEdit == null ? DIALOG_TITLE_ADD : DIALOG_TITLE_EDIT)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    title = taskTitle.getText() != null ? taskTitle.getText().toString().trim() : "";
+        btnSave.setOnClickListener(v -> {
+            title = taskTitle.getText() != null ? taskTitle.getText().toString().trim() : "";
 
-                    // Basic validation
-                    if (title.isEmpty()) {
-                        Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
-                        return; // Don't proceed
-                    }
-                    if (selectedDate == null || selectedDate.isEmpty()) {
-                        Toast.makeText(requireContext(), "Please select a date", Toast.LENGTH_SHORT).show();
-                        return; // Don't proceed
-                    }
-                    if (selectedTime == null || selectedTime.isEmpty()) {
-                        Toast.makeText(requireContext(), "Please select a time", Toast.LENGTH_SHORT).show();
-                        return; // Don't proceed
-                    }
+            // Basic validation
+            if (title.isEmpty()) {
+                Toast.makeText(requireContext(), "Task title cannot be empty", Toast.LENGTH_SHORT).show();
+                return; // Don't proceed
+            }
+            if (selectedDate == null || selectedDate.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select a date", Toast.LENGTH_SHORT).show();
+                return; // Don't proceed
+            }
+            if (selectedTime == null || selectedTime.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select a time", Toast.LENGTH_SHORT).show();
+                return; // Don't proceed
+            }
+            TaskList newTask = new TaskList(title, selectedDate, selectedTime);
 
-                    TaskList newTask = new TaskList(title, selectedDate, selectedTime);
+            // Check if we're editing or adding
+            if (taskToEdit != null && editPosition != -1) {
+                listener.onTaskUpdated(newTask, editPosition); // Update
+            } else {
+                listener.onTaskAdded(newTask); // Add
+            }
+            dismiss();
+        });
 
-                    // Check if we're editing or adding
-                    if (taskToEdit != null && editPosition != -1) {
-                        listener.onTaskUpdated(newTask, editPosition); // Update
-                    } else {
-                        listener.onTaskAdded(newTask); // Add
-                    }
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        btnCancle.setOnClickListener(v -> {
+            dismiss();
+        });
+
+        // create builder
+        builder.setView(view).
+                setTitle(taskToEdit == null ? DIALOG_TITLE_ADD : DIALOG_TITLE_EDIT);
         return builder.create();
+
     }
 
     private void showTimePicker(Button button) {
         // Determine initial hour/minute
-        int initialHour = 12;
-        int initialMinute = 0;
+        LocalTime currentTime = LocalTime.now();
+        int initialHour = currentTime.getHour();
+        int initialMinute = currentTime.getMinute();
         if (selectedTime != null && selectedTime.contains(":")) {
             try {
                 String[] parts = selectedTime.split(":");
@@ -147,13 +147,9 @@ public class CreateTasksFragment extends DialogFragment {
             }
         }
 
-        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTitleText(PICKER_TITLE_TIME) // Use hardcoded string
+        MaterialTimePicker timePicker = new MaterialTimePicker.Builder().setTitleText(PICKER_TITLE_TIME) // Use hardcoded string
                 .setTimeFormat(TimeFormat.CLOCK_12H) // Or CLOCK_24H
-                .setHour(initialHour)
-                .setMinute(initialMinute)
-                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                .build();
+                .setHour(initialHour).setMinute(initialMinute).setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK).build();
 
         timePicker.addOnPositiveButtonClickListener(view -> {
             int hour = timePicker.getHour();
@@ -184,19 +180,20 @@ public class CreateTasksFragment extends DialogFragment {
             }
         }
 
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText(PICKER_TITLE_DATE) //
-                .setSelection(initialSelection)
-                .build();
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker().setTitleText(PICKER_TITLE_DATE) //
+                .setSelection(initialSelection).build();
+
 
         datePicker.addOnPositiveButtonClickListener(selection -> {
             SimpleDateFormat sft_date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             selectedDate = sft_date.format(new Date(selection));
             Log.d("DatePicker", "Selected Date: " + selectedDate);
             button.setText(selectedDate);
+
         });
         datePicker.show(getParentFragmentManager(), "DatePicker");
     }
+
 
     // display time in 12-hour format with AM/PM
     private String formatDisplayTime(int hour, int minute) {
@@ -204,6 +201,9 @@ public class CreateTasksFragment extends DialogFragment {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
         SimpleDateFormat sdfDisplay = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+
         return sdfDisplay.format(calendar.getTime());
+
     }
+
 }

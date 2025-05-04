@@ -3,12 +3,16 @@ package com.project.todotasks;
 import androidx.annotation.NonNull;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class CompleteTasks {
     private String taskTitle;
     private String taskTime;
     private String taskDate;
     private LocalDateTime finishTime;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 
     @NonNull
     @Override
@@ -58,5 +62,13 @@ public class CompleteTasks {
 
     public void setFinishTime(LocalDateTime finishTime) {
         this.finishTime = finishTime;
+    }
+
+    public String getFinishDateString() {
+        if (finishTime != null) {
+            return finishTime.format(DATE_FORMATTER);
+        } else {
+            return ""; // Or return null, or a default string
+        }
     }
 }

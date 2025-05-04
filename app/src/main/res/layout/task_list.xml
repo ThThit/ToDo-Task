@@ -1,65 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="5dp"
     android:id="@+id/taskList"
-    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginTop="8dp"
     >
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp">
-
-        <!-- Contact Name -->
-        <TextView
-            android:id="@+id/task"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:padding="5dp"
-            android:text="Finish Homework"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/taskTime"
-            android:layout_width="75dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/task"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="0dp"
-            android:autofillHints=""
-            android:ems="10"
-            android:padding="5dp"
-            android:text="10 pm" />
+        android:layout_height="wrap_content"
+        android:padding="16dp"> <TextView
+        android:id="@+id/task"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Finish Homework That Is Quite Long and Might Wrap"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnTaskDone"
+        tools:text="Finish Homework That Is Quite Long and Might Wrap" />
 
         <TextView
-            android:id="@+id/taskDate"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/task"
-            android:layout_marginTop="0dp"
-            android:layout_toEndOf="@id/taskTime"
-            android:autofillHints=""
-            android:ems="10"
-            android:padding="5dp"
-            android:text="11.12.2025" />
+        android:id="@+id/taskTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="10:00 PM"
+        app:layout_constraintStart_toStartOf="@+id/task"
+        app:layout_constraintTop_toBottomOf="@+id/task"
+        tools:text="10:00 PM"/>
+
+        <TextView
+        android:id="@+id/taskDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Dec 11, 2025"
+        app:layout_constraintStart_toEndOf="@+id/taskTime"
+        app:layout_constraintTop_toTopOf="@+id/taskTime"
+        tools:text="Dec 11, 2025"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnTaskDone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="130dp"
-            android:layout_toEndOf="@id/task"
-            android:backgroundTint="@color/green"
-            android:contentDescription="Finished Task"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_done" />
-    </RelativeLayout>
+        android:id="@+id/btnTaskDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/design_default_color_primary"
+        android:contentDescription="Finished Task"
+        android:src="@drawable/ic_done"
+        app:fabSize="mini"
+        app:tint="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:ignore="HardcodedText" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

@@ -135,6 +135,9 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
         // select the "Ongoing" button on activity start
         filterButtonGroup.check(R.id.btnOngoing);
+
+        btnCompleted.setOnClickListener(v -> tasksAdapter.showCompletedTasks());
+        btnOngoing.setOnClickListener(v -> tasksAdapter.showOngoingTasks());
     }
 
     public void createTask(View view) {

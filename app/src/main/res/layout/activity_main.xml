@@ -51,7 +51,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="450dp"
+        android:layout_height="500dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginTop="10dp"
@@ -80,7 +80,7 @@
         style="@style/Widget.Material3.ExtendedFloatingActionButton.Primary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="28dp"
         android:contentDescription="Add a new task"
         android:icon="@drawable/ic_add_task"
         android:onClick="createTask"

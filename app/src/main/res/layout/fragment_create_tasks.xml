@@ -1,55 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".CreateTasksFragment"
-    android:orientation="vertical"
-    android:elevation="20dp"
-    >
+    app:cardCornerRadius="12dp"
+    app:cardElevation="16dp"
+    android:layout_margin="16dp"
+    tools:context=".CreateTasksFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/taskTitleField"
-        style="@style/Widget.Material3.TextInputEditText.FilledBox"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello_blank_fragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        tools:context=".CreateTasksFragment"
+        android:orientation="vertical"
+        android:elevation="20dp"
+        android:layout_marginBottom="10dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/taskTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+
+
+        <!-- TODO: Update blank fragment layout -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/taskTitleField"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
+            android:layout_width="0dp" android:layout_height="wrap_content"
             android:hint="Task Title"
-            android:inputType="text" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <Button
-        android:id="@+id/btnEditTime"
-        style="?attr/materialIconButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:onClick="editTime"
-        app:icon="@drawable/ic_clock"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/taskTitleField" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/taskTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/btnEditDate"
-        style="?attr/materialIconButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:onClick="editDate"
-        app:icon="@drawable/ic_edit_time"
-        app:layout_constraintStart_toEndOf="@id/btnEditTime"
-        app:layout_constraintTop_toBottomOf="@id/taskTitleField" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+        <Button
+            android:id="@+id/btnEditTime"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:onClick="editTime"
+            app:icon="@drawable/ic_clock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/taskTitleField" />
+
+        <Button
+            android:id="@+id/btnEditDate"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:onClick="editDate"
+            app:icon="@drawable/ic_edit_time"
+            app:layout_constraintStart_toEndOf="@id/btnEditTime"
+            app:layout_constraintTop_toBottomOf="@id/taskTitleField" />
+
+        <Button
+            android:id="@+id/btnSaveTask"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="Save Task"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnEditDate" />
+
+        <Button
+            android:id="@+id/btnCancelTask"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Cancel"
+            app:layout_constraintBottom_toBottomOf="@+id/btnSaveTask"
+            app:layout_constraintEnd_toStartOf="@+id/btnSaveTask"
+            app:layout_constraintTop_toTopOf="@+id/btnSaveTask" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.cardview.widget.CardView>

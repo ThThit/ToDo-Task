@@ -14,16 +14,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity; // Needed to show dialog
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapter.ViewHolder> {
@@ -37,34 +36,54 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
     private ArrayList<CompleteTasks> completeTasks;
     private final Context context;
     private final FragmentActivity activity; // Host activity for showing dialogs
+    private List<?> currentDisplayedTasks;
+    // choosing layout
+    private static final int VIEW_TYPE_ONGOING = 0;
+    private static final int VIEW_TYPE_COMPLETED = 1;
 
     // Constructor takes initial list
-    public TasksRecycleAdapter(Context context, FragmentActivity activity, ArrayList<TaskList> initialTasks, ArrayList<CompleteTasks> initialCompleteTasks) {
+    public TasksRecycleAdapter(Context context, FragmentActivity activity, ArrayList<TaskList> onGoingTasks, ArrayList<CompleteTasks> completeTasks) {
         this.context = context;
         this.activity = activity;
-        this.tasks = new ArrayList<>(initialTasks);
-        this.completeTasks = new ArrayList<>(initialCompleteTasks); // Create a mutable copy
+        this.tasks = new ArrayList<>(onGoingTasks);
+        this.completeTasks = new ArrayList<>(completeTasks); // Create a mutable copy
+
+        this.currentDisplayedTasks = onGoingTasks; // display ongoing tasks initially
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_list, parent, false);
-        return new ViewHolder(view);
+        View view;
+        if (viewType == VIEW_TYPE_COMPLETED){
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.complete_task_list, parent, false);
+        } else {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_list, parent, false);
+        }
+        return new ViewHolder(view,viewType);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TaskList taskList = tasks.get(position);
-        holder.taskTitle.setText(taskList.getTaskTitle());
+        Object item = currentDisplayedTasks.get(position);
 
-        holder.taskDate.setText(formatDisplayDate(taskList.getTaskDateString()));
-        holder.taskTime.setText(formatDisplayTime(taskList.getTaskTimeString()));
+        if (item instanceof CompleteTasks){
+            CompleteTasks completeTask = (CompleteTasks) item;
+            holder.taskTitle.setText(completeTask.getTaskTitle());
+            holder.taskDate.setText(formatDisplayDate(completeTask.getTaskDate()));
+            holder.taskTime.setText(formatDisplayTime(completeTask.getTaskTime()));
+//            holder.completedDate.setText(completeTask.getFinishDateString());
+        } else {
+            TaskList taskList = (TaskList) item;
+            holder.taskTitle.setText(taskList.getTaskTitle());
+            holder.taskDate.setText(formatDisplayDate(taskList.getTaskDateString()));
+            holder.taskTime.setText(formatDisplayTime(taskList.getTaskTimeString()));
+        }
 
         // Click listener for editing the task
         holder.parent.setOnClickListener(view -> {
             int currentPosition = holder.getAdapterPosition(); // Use getAdapterPosition()
-            if (currentPosition != RecyclerView.NO_POSITION) {
+            if (currentPosition != RecyclerView.NO_POSITION  && getItemViewType(currentPosition) == VIEW_TYPE_ONGOING) {
                 TaskList taskToEdit = tasks.get(currentPosition);
                 Log.d(TAG, "Editing task at pos " + currentPosition + ": " + taskToEdit.getTaskTitle());
 
@@ -76,60 +95,59 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
         });
 
         // Click listener for marking task as done (deleting)
-        holder.btnTaskDone.setOnClickListener(view -> {
-            int currentPosition = holder.getAdapterPosition();
-            if (currentPosition != RecyclerView.NO_POSITION) {
-                Log.d(TAG, "Deleting task at pos " + currentPosition);
+        if (holder.btnTaskDone != null){
+            holder.btnTaskDone.setOnClickListener(view -> {
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    Log.d(TAG, "Deleting task at pos " + currentPosition);
 
-                // Cancel the Alarm BEFORE removing ---
-                cancelAlarm(context, currentPosition);
+                    // Cancel the Alarm BEFORE removing ---
+                    cancelAlarm(context, currentPosition);
 
-                // Remove from adapter's list
-                TaskList removedTask = tasks.remove(currentPosition);
+                    // Remove from adapter's list
+                    TaskList removedTask = tasks.remove(currentPosition);
 
-                // get the completed time
-                LocalDateTime finishTime = LocalDateTime.now();
+                    // get the completed time
+                    LocalDateTime finishTime = LocalDateTime.now();
 
-                // add to complete task
-                CompleteTasks completeTask =  new CompleteTasks(
-                        removedTask.getTaskTitle(),
-                        removedTask.getTaskTimeString(),
-                        removedTask.getTaskDateString(),
-                        finishTime);
-                completeTasks.add(completeTask);
-                saveCompleteTasks(completeTasks);
+                    // add to complete task
+                    CompleteTasks completeTask =  new CompleteTasks(
+                            removedTask.getTaskTitle(),
+                            removedTask.getTaskTimeString(),
+                            removedTask.getTaskDateString(),
+                            finishTime);
+                    completeTasks.add(completeTask);
+                    saveCompleteTasks(completeTasks);
 
-                notifyItemRemoved(currentPosition);
-                // Notify subsequent items about position change
-                notifyItemRangeChanged(currentPosition, tasks.size() - currentPosition);
+                    notifyItemRemoved(currentPosition);
+                    // Notify subsequent items about position change
+                    notifyItemRangeChanged(currentPosition, tasks.size() - currentPosition);
 
-                // Save the updated list  to SharedPreferences
-                saveTasks(tasks);
-                Toast.makeText(context, "Task '" + removedTask.getTaskTitle() + "' Done", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    // Save the updated list  to SharedPreferences
+                    saveTasks(tasks);
+                    Toast.makeText(context, "Task '" + removedTask.getTaskTitle() + "' Done", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+
+    // get the type of current list
+    @Override
+    public int getItemViewType(int position) {
+        Object item = currentDisplayedTasks.get(position);
+        if (item instanceof CompleteTasks) {
+            return VIEW_TYPE_COMPLETED;
+        } else {
+            return VIEW_TYPE_ONGOING;
+        }
     }
 
     @Override
     public int getItemCount() {
-        return tasks.size();
+        return currentDisplayedTasks.size();
     }
 
-    // --- Data Modification Methods ---
-
-    // Method called by MainActivity when a task is added
-    public void addTask(TaskList task) {
-        tasks.add(task);
-        notifyItemInserted(tasks.size() - 1);
-    }
-
-    // Method called by MainActivity when a task is updated
-    public void updateTask(TaskList updatedTask, int position) {
-        if (position >= 0 && position < tasks.size()) {
-            tasks.set(position, updatedTask);
-            notifyItemChanged(position);
-        }
-    }
 
     // Set a new list of tasks (e.g., on initial load)
     public void setTasks(ArrayList<TaskList> newTasks) {
@@ -138,6 +156,19 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
         Log.d(TAG, "Adapter tasks updated, count: " + tasks.size());
     }
 
+    // update the tasks being display
+    private void setDisplayTasks(ArrayList<?> tasks){
+        this.currentDisplayedTasks = tasks;
+        notifyDataSetChanged(); // notify data set has changed
+    }
+
+    public void showCompletedTasks() {
+        setDisplayTasks(completeTasks);
+    }
+
+    public void showOngoingTasks() {
+        setDisplayTasks(tasks);
+    }
 
     // --- SharedPreferences Persistence (handled within Adapter for delete consistency) ---
 
@@ -149,6 +180,7 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
         Log.d(TAG, "Saving tasks from adapter: " + json);
         editor.putString(TASK_LIST_KEY, json);
         editor.apply();
+        notifyDataSetChanged();
     }
 
     private void saveCompleteTasks(ArrayList<CompleteTasks> completeTasks){
@@ -246,17 +278,17 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<TasksRecycleAdapte
 
     // --- ViewHolder ---
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView taskTitle, taskTime, taskDate;
+        private final TextView taskTitle, taskTime, taskDate, completedDate;
         View parent; // The root view of the list item
         FloatingActionButton btnTaskDone; // Assuming FAB for done
-
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
             parent = itemView; // Root view (e.g., CardView or ConstraintLayout)
             taskTitle = itemView.findViewById(R.id.task);
             taskTime = itemView.findViewById(R.id.taskTime);
             taskDate = itemView.findViewById(R.id.taskDate);
             btnTaskDone = itemView.findViewById(R.id.btnTaskDone); // Make sure ID exists in R.layout.task_list
+            completedDate = itemView.findViewById(R.id.completionDate);
         }
     }
 }
