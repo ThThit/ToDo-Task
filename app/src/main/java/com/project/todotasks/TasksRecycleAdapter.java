@@ -67,8 +67,6 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Object item = currentDisplayedTasks.get(position);
-
         if (holder  instanceof CompletedTaskViewHolder){
             CompleteTasks completeTask = (CompleteTasks) currentDisplayedTasks.get(position);
             CompletedTaskViewHolder completeHolder = (CompletedTaskViewHolder) holder;
@@ -93,7 +91,7 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                     CreateTasksFragment taskEditDialog = new CreateTasksFragment();
                     taskEditDialog.setTaskToEdit(taskToEdit, currentPosition); // Pass task and index
-
+                    notifyDataSetChanged();
                     taskEditDialog.show(activity.getSupportFragmentManager(), "EditTaskDialog");
                 }
             });
@@ -110,9 +108,6 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                         // Remove from adapter's list
                         TaskList removedTask = tasks.remove(currentPosition);
-
-                        // get the completed time
-                        LocalDateTime finishTime = LocalDateTime.now();
 
                         // add to complete task
                         CompleteTasks completeTask =  new CompleteTasks(
