@@ -2,14 +2,18 @@ package com.project.todotasks;
 
 import androidx.annotation.NonNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Objects;
 
 public class CompleteTasks {
     private String taskTitle;
     private String taskTime;
     private String taskDate;
-    private LocalDateTime finishTime;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -21,15 +25,13 @@ public class CompleteTasks {
                 "taskTitle='" + taskTitle + '\'' +
                 ", taskTime='" + taskTime + '\'' +
                 ", taskDate='" + taskDate + '\'' +
-                ", finishTime=" + finishTime +
                 '}';
     }
 
-    public CompleteTasks(String taskTitle, String taskTime, String taskDate, LocalDateTime finishTime) {
+    public CompleteTasks(String taskTitle, String taskTime, String taskDate) {
         this.taskTitle = taskTitle;
         this.taskTime = taskTime;
         this.taskDate = taskDate;
-        this.finishTime = finishTime;
     }
 
     public String getTaskTitle() {
@@ -56,19 +58,4 @@ public class CompleteTasks {
         this.taskDate = taskDate;
     }
 
-    public LocalDateTime getFinishTime() {
-        return finishTime;
-    }
-
-    public void setFinishTime(LocalDateTime finishTime) {
-        this.finishTime = finishTime;
-    }
-
-    public String getFinishDateString() {
-        if (finishTime != null) {
-            return finishTime.format(DATE_FORMATTER);
-        } else {
-            return ""; // Or return null, or a default string
-        }
-    }
 }

@@ -9,8 +9,7 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
     android:layout_marginHorizontal="8dp"
-    android:layout_marginTop="8dp"
-    >
+    android:layout_marginTop="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -23,27 +22,27 @@
             android:layout_height="24dp"
             android:contentDescription="Task Completed"
             android:src="@drawable/ic_done"
-            android:visibility="gone"
             android:tint="@color/green"
-            app:layout_constraintBottom_toTopOf="@+id/taskTime"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            tools:visibility="visible" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
 
         <TextView
             android:id="@+id/task"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Finish Homework That Is Quite Long and Might Wrap"
+            android:text="Finish Homework"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/completionIcon"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Finish Homework That Is Quite Long and Might Wrap" />
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintWidth_percent="0.5"
+            />
 
         <TextView
             android:id="@+id/taskTime"
@@ -53,7 +52,7 @@
             android:text="10:00 PM"
             app:layout_constraintStart_toStartOf="@+id/task"
             app:layout_constraintTop_toBottomOf="@+id/task"
-            tools:text="10:00 PM"/>
+            tools:text="10:00 PM" />
 
         <TextView
             android:id="@+id/taskDate"
@@ -63,33 +62,7 @@
             android:text="Dec 11, 2025"
             app:layout_constraintStart_toEndOf="@+id/taskTime"
             app:layout_constraintTop_toTopOf="@+id/taskTime"
-            tools:text="Dec 11, 2025"/>
-
-        <TextView
-            android:id="@+id/completion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Completed on: "
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@+id/taskTime" app:layout_constraintTop_toBottomOf="@+id/taskTime"
-            tools:visibility="visible" />
-        <TextView
-            android:id="@+id/completionDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Dec 12, 2025"
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:visibility="gone"
-            app:layout_constraintStart_toEndOf="@+id/completion"
-            app:layout_constraintTop_toBottomOf="@+id/taskDate"
-            tools:visibility="visible"
-            />
-
-
+            tools:text="Dec 11, 2025" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.cardview.widget.CardView>

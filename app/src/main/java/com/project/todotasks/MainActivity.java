@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
             Type type = new TypeToken<ArrayList<CompleteTasks>>() {}.getType();
             try {
                 ArrayList<CompleteTasks> loadedTasks = gson.fromJson(json, type);
+
                 return loadedTasks != null ? loadedTasks : new ArrayList<>();
             } catch (Exception e){
                 Log.e(TAG, "Error lading tasks from JSON complete", e);
