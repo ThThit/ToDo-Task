@@ -96,7 +96,7 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 }
             });
 
-            // Click listener for marking task as done (deleting)
+            // Click listener for marking task as done
             if (ongoingHolder.btnTaskDone != null){
                 ongoingHolder.btnTaskDone.setOnClickListener(view -> {
                     int currentPosition = ongoingHolder.getAdapterPosition();
@@ -108,6 +108,10 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                         // Remove from adapter's list
                         TaskList removedTask = tasks.remove(currentPosition);
+
+                        Date now = new Date();
+                        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+                        String currentTime = timeFormat.format(now);
 
                         // add to complete task
                         CompleteTasks completeTask =  new CompleteTasks(
@@ -123,7 +127,7 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                         // Save the updated list  to SharedPreferences
                         saveTasks(tasks);
-                        Toast.makeText(context, "Task '" + removedTask.getTaskTitle() + "' Done", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Task '" + removedTask.getTaskTitle() + "' Done at " + currentTime , Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -158,12 +162,14 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     // update the tasks being display
     private void setDisplayTasks(ArrayList<?> tasks){
+        notifyDataSetChanged();
         this.currentDisplayedTasks = tasks;
-        notifyDataSetChanged(); // notify data set has changed
+         // notify data set has changed
     }
 
     public void showCompletedTasks() {
         setDisplayTasks(completeTasks);
+        notifyDataSetChanged();
     }
 
     public void showOngoingTasks() {

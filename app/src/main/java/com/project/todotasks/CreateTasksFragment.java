@@ -1,4 +1,7 @@
 package com.project.todotasks;
+import static android.content.ContentValues.TAG;
+
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -27,10 +30,7 @@ import java.util.Locale;
 public class CreateTasksFragment extends DialogFragment {
 
     private TextInputEditText taskTitle;
-    private Button btnDate;
-    private Button btnTime;
-    private Button btnSave;
-    private Button btnCancle;
+    private Button btnDate, btnTime, btnSave, btnCancle, btnDelete;
     private String title;
     private String selectedDate; // Stores "yyyy-MM-dd"
     private String selectedTime; // Stores "HH:mm"
@@ -52,6 +52,7 @@ public class CreateTasksFragment extends DialogFragment {
     public interface TaskDialogListener {
         void onTaskAdded(TaskList tasks);
         void onTaskUpdated(TaskList newTask, int editPosition);
+        void onTaskDeleted(int editPosition);
     }
     private TaskDialogListener listener;
 
@@ -77,6 +78,7 @@ public class CreateTasksFragment extends DialogFragment {
         btnTime = view.findViewById(R.id.btnEditTime);
         btnSave = view.findViewById(R.id.btnSaveTask);
         btnCancle = view.findViewById(R.id.btnCancelTask);
+        btnDelete = view.findViewById(R.id.btnDeleteTask);
         btnDate.setOnClickListener(v -> showDatePicker(btnDate));
         btnTime.setOnClickListener(v -> showTimePicker(btnTime));
 
@@ -123,6 +125,21 @@ public class CreateTasksFragment extends DialogFragment {
 
         btnCancle.setOnClickListener(v -> {
             dismiss();
+        });
+
+        btnDelete.setOnClickListener(v -> {
+            if (editPosition != -1){
+                // show confirmation before deleting
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Delete Task")
+                        .setMessage("Are you sure you want to COMPLETELY DELETE this task?")
+                        .setPositiveButton("Yes", (dialog, which) ->{
+                            listener.onTaskDeleted(editPosition);
+                            dismiss();
+                        })
+                        .setNegativeButton("Cancle", null)
+                        .show();
+            }
         });
 
         // create builder

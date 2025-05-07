@@ -35,7 +35,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -257,6 +256,22 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
             scheduleSingleTaskNotification(this, task, newPosition); // Schedule updated task
         } else {
             Log.e(TAG, "Invalid position for task update: " + position);
+        }
+    }
+
+    @Override
+    public void onTaskDeleted(int editPosition) {
+        if (editPosition != RecyclerView.NO_POSITION){
+            cancelAlarm(this, editPosition);
+            TaskList deletedTask = tasksList.remove(editPosition);
+            saveTasks(tasksList);
+            tasksAdapter.setTasks(tasksList); // update adapter internal list
+            tasksAdapter.notifyDataSetChanged();
+
+            Toast.makeText(this, "Task '" + deletedTask.getTaskTitle() + "' deleted", Toast.LENGTH_SHORT).show();
+            scheduleAllTaskNotifications(this, tasksList); // reschedule all tasks
+        } else {
+            Log.e(TAG, "Invalid position for task deletion: " + editPosition);
         }
     }
 

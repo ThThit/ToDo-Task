@@ -19,13 +19,11 @@
         android:elevation="20dp"
         android:layout_marginBottom="10dp">
 
-
-
-        <!-- TODO: Update blank fragment layout -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/taskTitleField"
             style="@style/Widget.Material3.TextInputLayout.FilledBox"
-            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:hint="Task Title"
             android:layout_marginStart="14dp"
             android:layout_marginEnd="14dp"
@@ -41,54 +39,67 @@
                 android:inputType="textCapSentences" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEditTime"
-            style="?attr/materialIconButtonStyle"
+            style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:onClick="editTime"
+            android:text="time"
+            app:iconPadding="8dp"
             app:icon="@drawable/ic_clock"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/taskTitleField" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEditDate"
-            style="?attr/materialIconButtonStyle"
+            style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:onClick="editDate"
+            android:text="date"
+            app:iconPadding="8dp"
             app:icon="@drawable/ic_edit_time"
             app:layout_constraintStart_toEndOf="@id/btnEditTime"
             app:layout_constraintTop_toBottomOf="@id/taskTitleField" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveTask"
             style="@style/Widget.Material3.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:text="Save Task"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnEditDate" />
+            app:layout_constraintTop_toBottomOf="@+id/btnEditDate"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <Button
-            android:id="@+id/btnCancelTask"
+        <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCancelTask"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="@+id/btnSaveTask"
+        app:layout_constraintEnd_toStartOf="@+id/btnSaveTask"
+        app:layout_constraintTop_toTopOf="@+id/btnSaveTask" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteTask"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Cancel"
-            app:layout_constraintBottom_toBottomOf="@+id/btnSaveTask"
-            app:layout_constraintEnd_toStartOf="@+id/btnSaveTask"
-            app:layout_constraintTop_toTopOf="@+id/btnSaveTask" />
-
+            android:text="Delete"
+            app:layout_constraintBottom_toBottomOf="@+id/btnCancelTask"
+            app:layout_constraintEnd_toStartOf="@+id/btnCancelTask"
+            app:layout_constraintTop_toTopOf="@+id/btnCancelTask"
+            android:textColor="?attr/colorError"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.cardview.widget.CardView>
