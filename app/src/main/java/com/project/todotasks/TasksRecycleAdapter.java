@@ -173,6 +173,7 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public void showOngoingTasks() {
+        notifyDataSetChanged();
         setDisplayTasks(tasks);
     }
 

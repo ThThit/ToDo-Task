@@ -169,16 +169,6 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         editor.apply();
     }
 
-    private void saveCompleteTasks(ArrayList<CompleteTasks> completeTasks){
-        SharedPreferences sharedPreferences =  getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(completeTasks);
-        Log.d(TAG, "Saving complete tasks from adapter: " + json);
-        editor.putString(COMPLETE_TASK_LIST_KEY, json);
-        editor.apply();
-    }
-
     private ArrayList<TaskList> loadTasks() {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
         String json = sharedPreferences.getString(TASK_LIST_KEY, null);
@@ -267,7 +257,6 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
             saveTasks(tasksList);
             tasksAdapter.setTasks(tasksList); // update adapter internal list
             tasksAdapter.notifyDataSetChanged();
-
             Toast.makeText(this, "Task '" + deletedTask.getTaskTitle() + "' deleted", Toast.LENGTH_SHORT).show();
             scheduleAllTaskNotifications(this, tasksList); // reschedule all tasks
         } else {
