@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -24,7 +23,6 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     // unique request code for each notification's actions
     private static final int DISMISS_REQUEST_CODE_BASE = 1000;
-    private static final int DONE_REQUEST_CODE_BASE = 2000;
 
     @Override
     public void onReceive(Context context, Intent intent) {

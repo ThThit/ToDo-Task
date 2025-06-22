@@ -62,13 +62,8 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
 
 
     private ArrayList<TaskList> tasksList = new ArrayList<>();
-    private ArrayList<CompleteTasks> completeTasks = new ArrayList<>();
     private TasksRecycleAdapter tasksAdapter;
-    private RecyclerView taskViewRecycle;
     private AlarmManager alarmManager;
-    private MaterialButtonToggleGroup filterButtonGroup;
-    private Button btnOngoing;
-    private Button btnCompleted;
 
     // --- ActivityResultLaunchers (Permission Handling) ---
     private final ActivityResultLauncher<String> requestPermissionLauncher =
@@ -111,14 +106,14 @@ public class MainActivity extends AppCompatActivity implements CreateTasksFragme
         createNotificationChannel();
         requestNotificationPermissionIfNeeded();
 
-        taskViewRecycle = findViewById(R.id.taskView);
+        RecyclerView taskViewRecycle = findViewById(R.id.taskView);
         ExtendedFloatingActionButton fabAddTask = findViewById(R.id.btnNewTask);
-        filterButtonGroup = findViewById(R.id.filterButtonGroup);
-        btnOngoing = findViewById(R.id.btnOngoing);
-        btnCompleted = findViewById(R.id.btnCompleted);
+        MaterialButtonToggleGroup filterButtonGroup = findViewById(R.id.filterButtonGroup);
+        Button btnOngoing = findViewById(R.id.btnOngoing);
+        Button btnCompleted = findViewById(R.id.btnCompleted);
 
         tasksList = loadTasks();
-        completeTasks = loadCompleteTasks();
+        ArrayList<CompleteTasks> completeTasks = loadCompleteTasks();
         Log.d(TAG, "Loaded " + tasksList.size() + " tasks.");
 
         tasksAdapter = new TasksRecycleAdapter(this, this, tasksList, completeTasks);

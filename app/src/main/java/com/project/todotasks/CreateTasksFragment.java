@@ -1,26 +1,24 @@
 package com.project.todotasks;
-import static android.content.ContentValues.TAG;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.Calendar;
@@ -30,7 +28,8 @@ import java.util.Locale;
 public class CreateTasksFragment extends DialogFragment {
 
     private TextInputEditText taskTitle;
-    private Button btnDate, btnTime, btnSave, btnCancle, btnDelete;
+    private Button btnDate;
+    private Button btnTime;
     private String title;
     private String selectedDate; // Stores "yyyy-MM-dd"
     private String selectedTime; // Stores "HH:mm"
@@ -51,9 +50,12 @@ public class CreateTasksFragment extends DialogFragment {
 
     public interface TaskDialogListener {
         void onTaskAdded(TaskList tasks);
+
         void onTaskUpdated(TaskList newTask, int editPosition);
+
         void onTaskDeleted(int editPosition);
     }
+
     private TaskDialogListener listener;
 
     @Override
@@ -76,9 +78,9 @@ public class CreateTasksFragment extends DialogFragment {
         taskTitle = view.findViewById(R.id.taskTitle);
         btnDate = view.findViewById(R.id.btnEditDate);
         btnTime = view.findViewById(R.id.btnEditTime);
-        btnSave = view.findViewById(R.id.btnSaveTask);
-        btnCancle = view.findViewById(R.id.btnCancelTask);
-        btnDelete = view.findViewById(R.id.btnDeleteTask);
+        Button btnSave = view.findViewById(R.id.btnSaveTask);
+        Button btnCancel = view.findViewById(R.id.btnCancelTask);
+        Button btnDelete = view.findViewById(R.id.btnDeleteTask);
         btnDate.setOnClickListener(v -> showDatePicker(btnDate));
         btnTime.setOnClickListener(v -> showTimePicker(btnTime));
 
@@ -123,21 +125,19 @@ public class CreateTasksFragment extends DialogFragment {
             dismiss();
         });
 
-        btnCancle.setOnClickListener(v -> {
-            dismiss();
-        });
+        btnCancel.setOnClickListener(v -> dismiss());
 
         btnDelete.setOnClickListener(v -> {
-            if (editPosition != -1){
+            if (editPosition != -1) {
                 // show confirmation before deleting
                 new AlertDialog.Builder(requireContext())
                         .setTitle("Delete Task")
                         .setMessage("Are you sure you want to COMPLETELY DELETE this task?")
-                        .setPositiveButton("Yes", (dialog, which) ->{
+                        .setPositiveButton("Yes", (dialog, which) -> {
                             listener.onTaskDeleted(editPosition);
                             dismiss();
                         })
-                        .setNegativeButton("Cancle", null)
+                        .setNegativeButton("Cancel", null)
                         .show();
             }
         });

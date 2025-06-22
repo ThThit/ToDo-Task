@@ -12,14 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity; // Needed to show dialog
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,7 +36,7 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final String COMPLETE_TASK_LIST_KEY = "complete_task_list";
 
     private ArrayList<TaskList> tasks; // Keep local copy for adapter
-    private ArrayList<CompleteTasks> completeTasks;
+    private final ArrayList<CompleteTasks> completeTasks;
     private final Context context;
     private final FragmentActivity activity; // Host activity for showing dialogs
     private List<?> currentDisplayedTasks;
@@ -277,10 +279,6 @@ public class TasksRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             Log.e(TAG, "Error formatting display time: " + timeString_HHmm, e);
             return timeString_HHmm; // Fallback
         }
-    }
-
-    public void setCompleteTasks(ArrayList<CompleteTasks> completeTasks) {
-        this.completeTasks = completeTasks;
     }
 
     // --- ViewHolder ---

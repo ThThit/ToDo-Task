@@ -1,6 +1,6 @@
 package com.project.todotasks;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,9 +9,9 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class TaskList implements Comparable<TaskList>{
-    private String taskTitle;
-    private String taskDateString;
-    private String taskTimeString;
+    private final String taskTitle;
+    private final String taskDateString;
+    private final String taskTimeString;
     // Optional: Add a unique ID for more robust alarm handling later
     // private long id;
     public TaskList(String taskTitle, String taskDateString, String taskTimeString) {
@@ -33,18 +33,7 @@ public class TaskList implements Comparable<TaskList>{
     }
 
 
-    public void setTaskTitle(String taskTitle) {
-        this.taskTitle = taskTitle;
-    }
-
-    public void setTaskDateString(String taskDateString) {
-        this.taskDateString = taskDateString;
-    }
-
-    public void setTaskTimeString(String taskTimeString) {
-        this.taskTimeString = taskTimeString;
-    }
-
+    @NonNull
     @Override
     public String toString() {
         // Updated toString to use correct field names
